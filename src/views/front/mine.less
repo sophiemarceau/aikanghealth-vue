@@ -1,0 +1,68 @@
+@import url('../style.less');
+.summary-container {
+	min-height: 632px;
+	.box-card {
+		cursor: default;
+		user-select: none;
+		.info {
+			display: flex;
+			.left {
+				
+			}
+			.right {
+				margin-left: 15px;
+				flex-grow: 1;
+				.base {
+					font-size: 14px;
+					color: @fc-1;
+					margin-bottom: 8px;
+					overflow: hidden;
+					span {
+						border-right: solid 1px @bc-7;
+						padding: 0 30px;
+						&:first-of-type {
+							padding-left: 0;
+						}
+						&:last-of-type {
+							border-right: none;
+						}
+					}
+					.operate {
+						float: right;
+						display: flex;
+						cursor: pointer;
+						.el-icon {
+							margin-top: 2px;
+							color: @fc-27;
+						}
+						div {
+							font-size: 14px;
+							margin-left: 5px;
+							color: @fc-27;
+						}
+					}
+				}
+				p {
+					margin-top: 0;
+					font-size: 13px;
+					margin-bottom: 6px;
+					color: @fc-3;
+				}
+			}
+		}
+	}
+}
+
+.el-statistic {
+	--el-statistic-content-font-size:30px;
+}
+.statistic-card {
+	padding: 20px;
+	.title {
+		align-items:center;
+		font-size:14px;
+	}
+}
+.input {
+	width: 92%;
+}
