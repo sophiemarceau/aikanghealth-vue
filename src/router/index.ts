@@ -89,7 +89,25 @@ const routes: Array<RouteRecordRaw> = [
 					title: '体检套餐',
 					isTab: true
 				}
-			}
+			},
+			{
+				path: 'order',
+				name: 'MisOrder',
+				component: () => import('../views/systemmis/order.vue'),
+				meta: {
+					title:'订单管理',
+					isTab: true
+				}
+			},
+			{
+				path:'rule',
+				name:'MisRule',
+				component:() => import('../views/systemmis/rule.vue'),
+				meta:{
+					title:'促销规则',
+					isTab: true
+				}
+			},
 		]
 	},
 	{
