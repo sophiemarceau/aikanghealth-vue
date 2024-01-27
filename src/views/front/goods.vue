@@ -431,7 +431,6 @@
 			data.currentPrice = result.currentPrice;
 			data.ruleName = result.ruleName;
 			data.type = result.type;
-			data.tag = result.type;
 			data.tag = result.tag;
 			data.checkup_1 = result.checkup_1;
 			data.checkup_2 = result.checkup_2;

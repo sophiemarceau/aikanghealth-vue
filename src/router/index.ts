@@ -35,12 +35,16 @@ const routes: Array<RouteRecordRaw> = [
 						path: 'order_list',
 						name: 'FrontOrderList',
 						component: () => import('../views/front/order_list.vue')
-					}
+					},
 				]
-			}
+			},
+			{
+				path: 'goods_snapshot/:id/:mode',
+				name: 'FrontGoodsSnapshot',
+				component: () => import('../views/front/goods_snapshot.vue')
+			},
 		]
 	},
-
 	{
 		path: '/systemmis',
 		name: 'Main',

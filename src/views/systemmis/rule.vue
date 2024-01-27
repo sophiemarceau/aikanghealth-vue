@@ -53,6 +53,7 @@
 			{ pattern: '^[a-zA-Z0-9\u4e00-\u9fa5]{1,20}$', message: '规则名称不正确' }
 		]
 	});
+
 	const data = reactive({
 		dataList: [],
 		pageIndex: 1,
@@ -60,6 +61,47 @@
 		totalCount: 0,
 		loading: false
 	});
+
+	function loadDataList() {
+		data.loading = true;
+		let json = { page: data.pageIndex, length: data.pageSize, name: dataForm.name };
+		proxy.$http('/mis/rule/searchByPage', 'POST', json, true, function (resp) {
+			let page = resp.page;
+			let list = page.list;
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+		});
+	}
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.name == '') {
+					dataForm.name = null;
+				}
+				if (dataForm.pageIndex == '') {
+					dataForm.pageIndex = null;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
 </script>
 
 <style lang="less">

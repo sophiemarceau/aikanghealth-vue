@@ -88,6 +88,7 @@
 	                localStorage.setItem('permissions', permissions);
 	                localStorage.setItem('token', token);
 	                //跳转页面
+					console.log(resp);
 	                router.push({ name: 'MisHome' });
 	            } else {
 	                proxy.$message({

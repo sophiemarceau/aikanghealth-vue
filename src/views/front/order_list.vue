@@ -219,7 +219,6 @@
 							loadDataList();
 						}
 					});
-					loadDataList();
 				} else {
 					proxy.$message({
 						message: '退款申请失败，请联系客服',

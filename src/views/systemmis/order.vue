@@ -13,8 +13,8 @@
 					clearable="clearable" />
 			</el-form-item>
 			<el-form-item class="range">
-				<el-input v-model="dataForm.dataRange" type="daterange" range-separator="~" start-placeholder="起始日期"
-					end-placeholder="结束日期" value-format="YYYY-MM-DD" />
+				<el-date-picker v-model="dataForm.dataRange" type="daterange" range-separator="~"
+					start-placeholder="起始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
 			</el-form-item>
 			<el-form-item>
 				<el-select v-model="dataForm.status" class="input" placeholder="订单状态" clearable="clearable">
@@ -207,26 +207,7 @@
 		]
 	});
 	const data = reactive({
-		dataList: [
-			{
-				"amount": "3,377",
-				"snapshotId": "642c4fdb3925dd0e35cb0a38",
-				"registerTime": "2023-03-17",
-				"sex": "男",
-				"num": 0,
-				"photo": "",
-				"number": 1,
-				"createTime": "2023-08-04 12:37",
-				"goodsPrice": "3,377",
-				"outTradeNo": "44DCED2D0FC34EA498C647E565BC4ABB",
-				"name": "张大军",
-				"goodsTitle": "新感恩敬老高级体检套餐",
-				"tel": "13312345678",
-				"id": 87,
-				"status": "已关闭",
-				"createDate": "2023-08-04"
-			}
-		],
+		dataList: [],
 		pageIndex: 1,
 		pageSize: 10,
 		totalCount: 0,
@@ -234,10 +215,215 @@
 		selections: [],
 		expands: [],
 		getRowKeys(row) {
-			return row.id;
+			return row.id
 		},
 		appointment: []
 	});
+	function loadDataList() {
+		data.loading = true;
+		let range = dataForm.dataRange
+		let json = {
+			page: data.pageIndex,
+			length: data.pageSize,
+			keyword: dataForm.keyword,
+			code: dataForm.code,
+			tel: dataForm.tel,
+			status: dataForm.status,
+			startDate: (range != null && range.length == 2) ? range[0] : null,
+			endDate: (range != null && range.length == 2) ? range[1] : null,
+		};
+		proxy.$http('/mis/order/searchByPage', 'POST', json, true, function (resp) {
+			let statusEnum = {
+				'1': '未付款',
+				'2': '已关闭',
+				'3': '已付款',
+				'4': '已退款',
+				'5': '已预约',
+				'6': '已结束',
+			};
+			let page = resp.page;
+			let list = page.list;
+			for (let one of list) {
+				one.status = statusEnum[one.status + ""];
+			}
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+		});
+	}
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.keyword == '') {
+					dataForm.keyword = null;
+				}
+				if (dataForm.code == '') {
+					dataForm.code = null;
+				}
+				if (dataForm.tel == '') {
+					dataForm.tel = null;
+				}
+				if (dataForm.status == '') {
+					dataForm.status = null;
+				}
+				if (dataForm.pageIndex == 1) {
+					dataForm.pageIndex = 1;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
+
+	function expand(row, expandRows) {
+		if (expandRows.length > 0) {
+			data.expands = [];
+			if (row) {
+				data.appointment = []
+				let json = {
+					orderId: row.id
+				}
+				proxy.$http('/mis/appointment/searchByOrderId', "POST", json, true, function (resp) {
+					let result = resp.result
+					let statusEnum = {
+						"1": "未签到",
+						"2": "已签到",
+						"3": "已结束",
+						"4": "已关闭"
+					}
+					for (let one of result) {
+						one.status = statusEnum[one.status + ""]
+					}
+					data.appointment = result
+				});
+				data.expands.push(row.id);//展开订单记录的折叠面板 
+			} else {
+				data.expands = [];
+			}
+		}
+	}
+
+	function viewHandle(snapshotId) {
+		router.push(
+			{ name: 'FrontGoodsSnapshot', params: { id: snapshotId, mode: "mis" } }
+		);
+	}
+
+	function selectable(row, index) {
+		if (["未付款", "已关闭"].includes(row.status)) {
+			return true;
+		}
+		return false;
+	}
+
+	function selectionChangeHandle(val) {
+		data.selections = val;
+	}
+
+	function checkPaymentResultHandle() {
+		//提取选中订单记录的订单流水号
+		let outTradeNoArray = data.selections.map(item => {
+			return item.outTradeNo;
+		});
+		if (outTradeNoArray == null || outTradeNoArray.length == 0) {
+			proxy.$message({
+				message: '没有选中记录',
+				type: 'error',
+				duration: 1200
+			});
+			return;
+		}
+		let json = { outTradeNoArray: outTradeNoArray };
+		proxy.$http('/mis/order/checkPaymentResult', 'POST', json, true, function (resp) {
+			if (resp.rows > 0) {
+				proxy.$message({
+					message: '成功同步了${resp.rows}条付款记录',
+					type: 'success',
+					duration: 1200,
+					onClose: () => {
+						loadDataList();
+					}
+				});
+			} else {
+				proxy.$message({
+					message: '没有查询到这些订单付款成功',
+					type: 'warning',
+					duration: 1200,
+				});
+			}
+		});
+	}
+
+	function deleteHandle(id) {
+		proxy.$confirm(`确定要删除这条订单记录？`, '提示', {
+			confirmButtonText: '确定',
+			cancelButonText: '取消',
+			type: 'warning'
+		}).then(() => {
+			let json = { "id": id };
+			proxy.$http('/mis/order/deleteById', 'POST', json, true, function (resp) {
+				if (resp.rows > 0) {
+					proxy.$message({
+						message: '操作成功',
+						type: 'success',
+						duration: 1200,
+						onClose: () => {
+							loadDataList();
+						}
+					});
+				} else {
+					proxy.$message({
+						message: '未能删除记录',
+						type: 'warning',
+						duration: 1200
+					});
+				}
+			});
+		});
+	}
+
+	function updateHandle(id) {
+		proxy.$confirm(`确定该订单已经线下退款成功？`, '提示', {
+			confirmButtonText: '确定',
+			cancelButonText: '取消',
+			type: 'warning'
+		}).then(() => {
+			let json = { "id": id };
+			proxy.$http('/mis/order/updateRefundStatusById', 'POST', json, true, function (resp) {
+				if (resp.rows > 0) {
+					proxy.$message({
+						message: '操作成功',
+						type: 'success',
+						duration: 1200,
+						onClose: () => {
+							loadDataList();
+						}
+					});
+				} else {
+					proxy.$message({
+						message: '未能更新订单状态',
+						type: 'warning',
+						duration: 1200
+					});
+				}
+			});
+		});
+	}
 </script>
 
 <style lang="less" scoped>
