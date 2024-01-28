@@ -37,6 +37,29 @@
 		:page-sizes="[10, 20, 50]" :page-size="data.pageSize" :total="data.totalCount"
 		layout="total, sizes, prev, pager, next, jumper">
 	</el-pagination>
+
+	<el-dialog :title="!dialog.dataForm.id ? '新增' : '修改'" v-if="proxy.isAuth(['ROOT', 'RULE:INSERT', 'RULE:UPDATE'])"
+		:close-on-click-modal="false" v-model="dialog.visible" width="500px">
+		<el-form :model="dialog.dataForm" ref="dialogForm" :rules="dialog.dataRule" label-width="80px">
+			<el-form-item label="规则名称" prop="name">
+				<el-input v-model="dialog.dataForm.name" maxlength="20" clearable />
+			</el-form-item>
+			<el-form-item label="规则内容" progress="rule">
+				<el-input v-model="dialog.dataForm.rule" type="textarea" rows="5" clearable></el-input>
+			</el-form-item>
+			<el-form-item label="备注信息">
+				<el-input v-model="dialog.dataForm.remark" type="textarea" rows="3" clearable></el-input>
+			</el-form-item>
+
+
+		</el-form>
+		<template #footer>
+			<span class="dialog-foot">
+				<el-button @click="dialog.visible= false">取消</el-button>
+				<el-button type="primary" @click="dataFormSubmit">确定</el-button>
+			</span>
+		</template>
+	</el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -61,6 +84,24 @@
 		totalCount: 0,
 		loading: false
 	});
+
+	const dialog = reactive({
+		visible: false,
+		dataForm: {
+			id: null,
+			name: null,
+			remark: null,
+			rule: null
+		},
+		dataRule: {
+			name: [
+				{ required: true, message: '规则名称不能为空' },
+				{ pattern: '^[a-zA-Z0-9\u4e00-\u9fa5]{1,20}$', message: '规则名称不正确' }
+			],
+			rule: [{ required: true, trigger: 'blur', message: '规则内容不能为空' }]
+		}
+	});
+
 
 	function loadDataList() {
 		data.loading = true;
@@ -101,6 +142,90 @@
 	function currentChangeHandle(val) {
 		data.pageIndex = val;
 		loadDataList();
+	}
+
+	function addHandle() {
+		dialog.dataForm.id = null;
+		dialog.dataForm.remark = null;
+		dialog.visible = true;
+		proxy.$nextTick(() => {
+			proxy.$refs['dialogForm'].resetFields();
+		});
+	}
+
+	function dataFormSubmit() {
+		proxy.$refs['dialogForm'].validate(valid => {
+			if (valid) {
+				proxy.$http(`/mis/rule/${dialog.dataForm.id == null ? 'insert' : 'update'}`,
+					'POST',
+					dialog.dataForm,
+					true, function (resp) {
+						if (resp.rows == 1) {
+							proxy.$message({
+								message: '操作成功',
+								type: 'success',
+								duration: 1200,
+								onClose: () => {
+									dialog.visible = false;
+									loadDataList()
+								}
+							});
+						} else {
+							proxy.$message({
+								message: '操作失败',
+								type: 'error',
+								duration: 1200
+							});
+						}
+					});
+			}
+		});
+	}
+
+	function updateHandle(id) {
+		dialog.dataForm.id = id;
+		dialog.visible = true;
+		proxy.$nextTick(() => {
+			proxy.$refs['dialogForm'].resetFields();
+			let json = {
+				id: id
+			};
+			proxy.$http('/mis/rule/searchById', 'POST', json, true, function (resp) {
+				let result = resp.result;
+				dialog.dataForm.name = result.name;
+				dialog.dataForm.rule = result.rule;
+				dialog.dataForm.tel = result.tel;
+				dialog.dataForm.remark = result.remark;
+			});
+		});
+	}
+
+	function deleteHandle(id) {
+		proxy.$confirm(`确定要删除选中的记录？`, '提示', {
+			confirmButtonText: '确定',
+			cancelButonText: '取消',
+			type: 'warning'
+		}).then(() => {
+			let json = { id: id };
+			proxy.$http('/mis/rule/deleteById', 'POST', json, true, function (resp) {
+				if (resp.rows > 0) {
+					proxy.$message({
+						message: '操作成功',
+						type: 'success',
+						duration: 1200,
+						onClose: () => {
+							loadDataList();
+						}
+					});
+				} else {
+					proxy.$message({
+						message: '未能删除记录',
+						type: 'warning',
+						duration: 1200
+					});
+				}
+			});
+		});
 	}
 </script>
 
