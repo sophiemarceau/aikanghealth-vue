@@ -167,7 +167,10 @@
 					<el-button type="text" v-if="proxy.isAuth(['ROOT', 'ORDER:DELETE'])"
 						:disabled="scope.row.status!='已关闭'" @click="deleteHandle(scope.row.id)">删除</el-button>
 					<el-button type="text" v-if="proxy.isAuth(['ROOT', 'ORDER:UPDATE'])"
-						:disable="scope.row.status!='已付款'" @click="updateHandle(scope.row.id)">线下退款</el-button>
+						:disabled="scope.row.status!='已付款'" @click="updateHandle(scope.row.id)">
+						线下退款
+					</el-button>
+
 				</template>
 			</el-table-column>
 		</el-table>
@@ -347,7 +350,7 @@
 				duration: 1200
 			});
 			return;
-		}            
+		}
 		let json = { outTradeNoArray: outTradeNoArray };
 		proxy.$http('/mis/order/checkPaymentResult', 'POST', json, true, function (resp) {
 			if (resp.rows > 0) {
