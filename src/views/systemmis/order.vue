@@ -347,12 +347,12 @@
 				duration: 1200
 			});
 			return;
-		}
+		}            
 		let json = { outTradeNoArray: outTradeNoArray };
 		proxy.$http('/mis/order/checkPaymentResult', 'POST', json, true, function (resp) {
 			if (resp.rows > 0) {
 				proxy.$message({
-					message: '成功同步了${resp.rows}条付款记录',
+					message: `成功同步了${resp.rows}条付款记录`,
 					type: 'success',
 					duration: 1200,
 					onClose: () => {
