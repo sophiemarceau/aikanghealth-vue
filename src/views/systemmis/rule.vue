@@ -145,13 +145,15 @@
 	}
 
 	function addHandle() {
-		dialog.dataForm.id = null;
-		dialog.dataForm.remark = null;
-		dialog.visible = true;
-		proxy.$nextTick(() => {
-			proxy.$refs['dialogForm'].resetFields();
-		});
+	    dialog.dataForm.id = null;
+	    //因为remark是非必填数据，所以需要我们自己清空
+	    dialog.dataForm.remark = null;
+	    dialog.visible = true;
+	    proxy.$nextTick(() => {
+	        proxy.$refs['dialogForm'].resetFields();
+	    });
 	}
+
 
 	function dataFormSubmit() {
 		proxy.$refs['dialogForm'].validate(valid => {

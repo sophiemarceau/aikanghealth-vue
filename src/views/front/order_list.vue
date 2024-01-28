@@ -315,6 +315,13 @@
 			});
 		});
 	}
+
+	function searchDetailHandle(snapshotId) {
+		router.push({
+			name: "FrontGoodsSnapshot",
+			params: { id: snapshotId, mode: 'front' },
+		});
+	}
 	// const data = reactive({
 	// 	dataList: [
 	// 		{

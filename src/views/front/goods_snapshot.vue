@@ -261,8 +261,7 @@
 	import { reactive, ref, Ref, getCurrentInstance, onMounted } from 'vue';
 	import router from '../../router/index';
 	const { proxy } = getCurrentInstance();
-	let id = router.currentRoute.value.params.id;
-	let mode = router.currentRoute.value.params.mode;
+	
 	const data = reactive({
 		code: null,
 		title: null,
@@ -283,11 +282,17 @@
 		count_4: null,
 		checkupCount: null
 	});
+	
+	let id = router.currentRoute.value.params.id;
+	let mode = router.currentRoute.value.params.mode;
+	
 	function loadSnapshot() {
 		let json = {
 			snapshotId: id
 		};
+		console.log(mode)
 		let url = (mode == "front") ? "/front/goods/searchSnapshotForFront" : "/front/goods/searchSnapshotForMis"
+		console.log(url)
 		proxy.$http(url, 'POST', json, true, function (resp) {
 			let result = resp.result;
 			data.code = result.code;
