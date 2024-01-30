@@ -1,0 +1,100 @@
+@import url('../style.less');
+.panel-container {
+	display: flex;
+	.home-TUIKit-main {
+		display: flex;
+		width: 1050px;
+		overflow: hidden;
+		border: solid 1px @bc-4;
+		border-radius: 5px;
+
+		.conversation {
+			min-width: 285px;
+			border-right: 1px solid @bc-4;
+			background-color: @bgc-31;
+		}
+
+		.TUIKit-search {
+			padding: 12px !important;
+		}
+
+		.TUI-conversation {
+			background-color: @bgc-31 !important;
+		}
+
+		.TUIKit-chat {
+			flex-grow: 1;
+			height: 100%;
+			position: relative;
+		}
+
+		.message-input-area {
+			overflow-y: auto !important;
+		}
+
+		.TUIChat-header h1 {
+			font-family: Helvetica Neue, Helvetica, Arial, Microsoft Yahei, Hiragino Sans GB, Heiti SC, WenQuanYi Micro Hei, sans-serif !important;
+		}
+
+		.conversation-options {
+			height: 17px !important;
+			margin-top: 12px;
+			&:last-of-type {
+				padding-bottom: 32px;
+			}
+		}
+	}
+
+	.customer-info {
+		margin-left: 20px;
+		flex-grow: 1;
+		.box-card {
+			cursor: default;
+			user-select: none;
+			.info {
+				display: flex;
+				.left {
+				}
+				.right {
+					margin-left: 15px;
+					.customer-name {
+						color: @fc-1;
+						font-size: 18px;
+						margin: 5px 0 0 0;
+					}
+					.customer-desc {
+						display: flex;
+						margin-top: 10px;
+						margin-bottom: 0;
+						.icon {
+						}
+						.value {
+							margin-left: 5px;
+							margin-right: 25px;
+							&:last-of-type {
+								margin-right: 0;
+							}
+						}
+					}
+				}
+			}
+		}
+		.orders-table {
+			margin-top: 20px;
+		}
+	}
+}
+
+.el-statistic {
+	--el-statistic-content-font-size: 26px;
+}
+
+-statistic-card {
+	height: 100%;
+	padding: 20px;
+	.title {
+		display: inline-flex;
+		align-items: center;
+		font-size: 14px;
+	}
+}

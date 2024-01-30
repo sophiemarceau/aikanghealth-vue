@@ -53,6 +53,17 @@ app.config.globalProperties.$baseUrl = baseUrl; //设置全局变量$baseUrl
 let minioUrl = 'http://localhost:9000/his';
 app.config.globalProperties.$minioUrl = minioUrl;
 
+//配置 腾讯IM
+import { TUIComponents, TUICore, genTestUserSig } from './TUIKit';
+
+import { TUICallKit } from '@tencentcloud/call-uikit-vue';
+
+const SDKAppID = 1600022521;
+const TUIKit = TUICore.init({SDKAppID});
+TUIKit.use(TUIComponents);
+TUIKit.use(TUICallKit);
+app.use(TUIKit);
+
 //封装全局Ajax公共函数
 app.config.globalProperties.$http = function (url : string, method : string, data : JSON, async : boolean, fun : Function) {
     $.ajax({

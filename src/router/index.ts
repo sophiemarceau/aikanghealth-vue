@@ -36,6 +36,11 @@ const routes: Array<RouteRecordRaw> = [
 						name: 'FrontOrderList',
 						component: () => import('../views/front/order_list.vue')
 					},
+					{
+						path: 'customer_im',
+						name: 'FrontCustomerIm',
+						component: () => import('../views/front/customer_im.vue')
+					}
 				]
 			},
 			{
@@ -109,6 +114,15 @@ const routes: Array<RouteRecordRaw> = [
 				component:() => import('../views/systemmis/rule.vue'),
 				meta:{
 					title:'促销规则',
+					isTab: true
+				}
+			},
+			{
+				path:'customer_im',
+				name:'MisCustomerIm',
+				component:() => import('../views/systemmis/customer_im.vue'),
+				meta:{
+					title:'客服IM',
 					isTab: true
 				}
 			},
