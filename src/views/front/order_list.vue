@@ -92,6 +92,47 @@
 			</el-button>
 		</div>
 	</el-dialog>
+
+	<el-dialog title="体检预约" :close-on-click-modal="false" v-model="appointDialog.visible" width="550px">
+		<el-form :model="appointDialog.dataForm" ref="dialogForm" :rules="appointDialog.dataRule" label-width="80px">
+			<fieldset class="appointment">
+				<legend>
+					<h4>我的预约</h4>
+				</legend>
+				<el-form-item label="预约日期" prop="date">
+					<el-date-picker v-model="appointDialog.dataForm.date" type="date" placeholder="选择日期" size="medium"
+						:editable="false" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+						:disabled-date="disabledDate"></el-date-picker>
+				</el-form-item>
+				<el-form-item label="体检人" prop="name">
+					<el-input v-model="appointDialog.dataForm.name" size="medium" placeholder="输入姓名" maxlength="10"
+						clearable />
+				</el-form-item>
+				<el-form-item label="身份证号" prop="pid">
+					<el-input v-model="appointDialog.dataForm.pid" size="medium" placeholder="输入身份证号" maxlength="18"
+						clearable />
+				</el-form-item>
+				<el-form-item label="电话号码" prop="tel">
+					<el-input v-model="appointDialog.dataForm.tel" size="medium" placeholder="输入电话号码" maxlength="11"
+						clearable />
+				</el-form-item>
+				<el-form-item label="邮寄地址" prop="mailingAddress">
+					<el-input v-model="appointDialog.dataForm.mailingAddress" size="medium" placeholder="输入接受体检报告的邮寄地址"
+						maxlength="100" clearable />
+				</el-form-item>
+				<el-form-item label="公司名称" prop="company">
+					<el-input v-model="appointDialog.dataForm.company" size="medium" placeholder="输入公司名称"
+						maxlength="100" clearable />
+				</el-form-item>
+			</fieldset>
+		</el-form>
+		<template #footer>
+			<span class="dialog-footer">
+				<el-button size="medium" @click="appointDialog.visible=false">取消</el-button>
+				<el-button size="primary" @click="dataFormSubmit">确定</el-button>
+			</span>
+		</template>
+	</el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -132,6 +173,43 @@
 		result: false,
 		qrCode: null,
 		outTradeNo: null//订单流水号，查询付款结果时候用
+	});
+
+	const appointDialog = reactive({
+		visible: true,
+		number: null,
+		appointCount: null,
+		dataForm: {
+			orderId: null,
+			date: null,
+			name: null,
+			pid: null,
+			tel: null,
+			mailingAddress: null,
+			company: null
+		},
+		dataRule: {
+			date: [{ required: true, message: '日期不能为空' }],
+			name: [
+				{ required: true, message: '姓名不能为空' },
+				{ pattern: '^[\u4e00-\u9fa5]{2,10}$', message: '姓名格式错误' }
+			],
+			pid: [
+				{ required: true, message: '身份证号不能为空' },
+				{ pattern: '^[0-9Xx]{18}$', message: '身份证号格式错误' }
+			],
+			tel: [
+				{ required: true, message: '电话号码不能为空' },
+				{ pattern: '^1[1-9]\\d{9}$', message: '电话号码格式错误' }
+			],
+			mailingAddress: [
+				{ required: true, message: '邮寄地址不能为空' },
+				{ pattern: '^[0-9A-Za-z\u4e00-\u9fa5\\-_#]{10,100}$', message: '邮寄地址格式错误' }
+			],
+			company: [
+				{ required: false, pattern: '^[0-9A-Za-z\u4e00-\u9fa5\\-_#]{2,100}$', message: '公司名称不正确' }
+			]
+		}
 	});
 
 	function loadDataList() {
@@ -321,6 +399,12 @@
 			name: "FrontGoodsSnapshot",
 			params: { id: snapshotId, mode: 'front' },
 		});
+	}
+
+	function disabledDate(date) {
+		// 限制预约未来60天的体检
+		let bool = dayjs(date).isBetween(dayjd(), dayjs().add(61, 'day'));
+		return !bool;
 	}
 	// const data = reactive({
 	// 	dataList: [

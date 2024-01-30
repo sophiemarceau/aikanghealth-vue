@@ -40,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
 						path: 'customer_im',
 						name: 'FrontCustomerIm',
 						component: () => import('../views/front/customer_im.vue')
+					},
+					{
+						path: 'appointment_list',
+						name: 'FrontAppointmentList',
+						component: () => import('../views/front/appointment_list.vue')
 					}
 				]
 			},
@@ -123,6 +128,15 @@ const routes: Array<RouteRecordRaw> = [
 				component:() => import('../views/systemmis/customer_im.vue'),
 				meta:{
 					title:'客服IM',
+					isTab: true
+				}
+			},
+			{
+				path: 'appointment',
+				name: 'MisAppointment',
+				component: () => import('../views/systemmis/appointment.vue'),
+				meta:{
+					title:'体检预约',
 					isTab: true
 				}
 			},
