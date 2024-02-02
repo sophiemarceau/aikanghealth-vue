@@ -91,6 +91,134 @@
 		loading: false,
 		selections: []
 	});
+
+	function loadDataList() {
+		data.loading = true;
+		if (dataForm.statusLabel == '全部') {
+			dataForm.status = null;
+		} else if (dataForm.statusLabel == '未签到') {
+			dataForm.status = 1;
+		} else if (dataForm.statusLabel == '已签到') {
+			dataForm.status = 2;
+		} else if (dataForm.statusLabel == '已结束') {
+			dataForm.status = 3;
+		} else if (dataForm.statusLabel == '已关闭') {
+			dataForm.status = 4;
+		}
+		let json = {
+			name: dataForm.name,
+			tel: dataForm.tel,
+			date: dataForm.date,
+			status: dataForm.status,
+			page: data.pageIndex,
+			length: data.pageSize
+		};
+		proxy.$http('/mis/appointment/searchByPage', 'POST', json, true, function (resp) {
+			let page = resp.page;
+			let list = page.list;
+		
+			let statusEnum = {
+				"1": "未签到",
+				"2": "已签到",
+				"3": "已结束",
+				"4": "已关闭"
+			};
+			for (let one of list) {
+				one.status = statusEnum[one.status + ""]
+			}
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+		});
+	}
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.date == '') {
+					dataForm.date = null;
+				}
+				if (dataForm.name == '') {
+					dataForm.name = null;
+				}
+				if (dataForm.tel == '') {
+					dataForm.tel = null;
+				}
+				if (dataForm.pageIndex != 1) {
+					dataForm.pageIndex = 1;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
+
+	function selectionChangeHandle(val) {
+		data.selections = val;
+	}
+
+	function selectable(row, index) {
+		if (row.status != '未签到') {
+			return false;
+		}
+		return true;
+	}
+	
+	function deleteHandle(id) {
+		let ids = id
+			? [id] : data.selections.map(item => {
+				return item.id;
+			});
+		if (ids.length == 0) {
+			proxy.$message({
+				message: '没有选中记录',
+				type: 'warning',
+				duration: 1200
+			});
+		} else {
+			proxy.$confirm('确定要删除选中的记录？', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning',
+	
+			}).then(() => {
+				let json = { ids: ids };
+				console.log(json);
+				proxy.$http('/mis/appointment/deleteByIds', 'POST', json, true, function (resp) {
+					if (resp.rows > 0) {
+						proxy.$message({
+							message: '操作成功',
+							type: 'success',
+							duration: 1200,
+							onClose: () => {
+								loadDataList()
+							}
+						});
+					} else {
+						proxy.$message({
+							message: '未能删除记录',
+							type: 'warning',
+							duration: 1200
+						});
+					}
+				});
+			});
+		}
+	}
 </script>
 
 <style lang="less" scoped>

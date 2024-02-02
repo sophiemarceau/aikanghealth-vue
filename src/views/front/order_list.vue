@@ -176,7 +176,7 @@
 	});
 
 	const appointDialog = reactive({
-		visible: true,
+		visible: false,
 		number: null,
 		appointCount: null,
 		dataForm: {
@@ -403,9 +403,62 @@
 
 	function disabledDate(date) {
 		// 限制预约未来60天的体检
-		let bool = dayjs(date).isBetween(dayjd(), dayjs().add(61, 'day'));
+		let bool = dayjs(date).isBetween(dayjs(), dayjs().add(61, 'day'));
 		return !bool;
 	}
+
+	function appointHandle(id, number, appointCount) {
+		if (appointCount == 0) {
+			proxy.$confirm(`该订单预约体检后将无法退款，是否预约体检`, '提示信息', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				appointDialog.visible = true;
+				appointDialog.dataForm.orderId = id;
+				appointDialog.number = number;
+				appointDialog.appointCount = ++appointCount;
+				proxy.$nextTick(() => {
+					proxy.$refs['dialogForm'].resetFields();
+				});
+			});
+		}
+	}
+
+	function dataFormSubmit() {
+		proxy.$refs['dialogForm'].validate(valid => {
+			if (valid) {
+				let json = {
+					orderId: appointDialog.dataForm.orderId,
+					date: appointDialog.dataForm.date,
+					name: appointDialog.dataForm.name,
+					pid: appointDialog.dataForm.pid,
+					tel: appointDialog.dataForm.tel,
+					mailingAddress: appointDialog.dataForm.mailingAddress,
+					company: appointDialog.dataForm.company
+				};
+				proxy.$http('/front/appointment/insert', 'POST', json, true, function (resp) {
+					let result = resp.result
+					if (result == "预约成功") {
+						proxy.$message({
+							message: result,
+							type: 'success',
+							duration: 1200,
+						});
+						appointDialog.visible = false;
+						loadDataList();
+					} else {
+						proxy.$message({
+							message: result,
+							type: 'error',
+							duration: 1200
+						});
+					}
+				});
+			}
+		});
+	}
+
 	// const data = reactive({
 	// 	dataList: [
 	// 		{

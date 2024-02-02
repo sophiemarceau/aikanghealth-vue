@@ -54,7 +54,7 @@
 	import isBetween from 'dayjs/plugin/isBetween';
 	dayjs.extend(isBetween);
 	const { proxy } = getCurrentInstance();
-	let empty = ref(false);
+	let empty = ref(true);
 	const dataForm = reactive({
 		keyword: null,
 		date: null,
@@ -73,6 +73,75 @@
 		totalCount: 0,
 		loading: false
 	});
+
+	function loadDataList() {
+		data.loading = true;
+		if (dataForm.statusLabel == '全部') {
+			dataForm.status = null;
+		} else {
+			dataForm.status = 4
+		}
+		let json = {
+			page: data.pageIndex,
+			length: data.pageSize,
+			keyword: dataForm.keyword,
+			date: dataForm.date,
+			status: dataForm.status
+		};
+		proxy.$http('/front/appointment/searchByPage', 'POST', json, true, function (resp) {
+			let statusEnum = {
+				"1": "未签到",
+				"2": "已签到",
+				"3": "已结束",
+				"4": "已关闭"
+			};
+			let page = resp.page;
+			let list = page.list;
+			for (let one of list) {
+				one.status = statusEnum[one.status + ""]
+				if (one.filePath != null) {
+					one.filePath = `${proxy.$miniUrl}/${one.filePath}`
+				}
+			}
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+			empty = list.length == 0;
+		});
+	}
+
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.keyword == '') {
+					dataForm.keyword = null;
+				}
+				if (dataForm.date == '') {
+					dataForm.date = null;
+				}
+				if (dataForm.status == '') {
+					dataForm.status = null;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
 </script>
 
 <style lang="less" scoped>
