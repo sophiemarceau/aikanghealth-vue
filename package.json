@@ -18,7 +18,7 @@
         "fast-glob": "^3.2.12",
         "html2canvas": "1.4.1",
         "jquery": "^3.6.3",
-        "jspdf": "2.5.1",
+        "jspdf": "^2.5.1",
         "sass": "1.58.1",
         "vue": "3.2.45",
         "vue-native-websocket-vue3": "^3.1.7",

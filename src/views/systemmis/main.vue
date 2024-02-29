@@ -120,7 +120,7 @@
 							<span slot="title">预约设置</span>
 						</el-menu-item>
 						<el-menu-item index="MisCheckup" v-if="proxy.isAuth(['ROOT', 'CHECKUP:SELECT'])"
-							@click="$router.push({ name: 'MisCheckup' })">
+							@click="$router.push({ name: 'MisDoctorCheckup' })">
 							<SvgIcon name="doctor_fill" class="icon-svg" />
 							<span slot="title">医生检查</span>
 						</el-menu-item>
@@ -261,7 +261,7 @@
 
 	/*
 	 * 载入框架页面就立即执行routeHandle()函数，把当前路由加载页面对应的Tab控件选中
-	 * 例如直接访问http://localhost:7600/mis/role页面，需要让框架页面创建Tab控件，并且选中该Tab
+	 * 例如直接访问http://192.168.31.143:7600/mis/role页面，需要让框架页面创建Tab控件，并且选中该Tab
 	 */
 	routeHandle(route)
 

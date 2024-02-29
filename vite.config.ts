@@ -29,7 +29,7 @@ export default defineConfig({
         })
     ],
     server: {
-        host: 'localhost',
+        host: '192.168.31.143',
         port: 7600,
 		//允许跨域
 		cors:true

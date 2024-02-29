@@ -43,14 +43,13 @@
 			<el-table-column prop="pid" header-align="center" align="center" label="身份证号码" width="190" />
 			<el-table-column prop="company" header-align="center" align="center" label="公司名称" width="200" />
 			<el-table-column prop="title" header-align="center" align="center" label="体检套餐" min-width="200" />
-			<el-table-column prop="tel" header-align="center" align="center" label="状态" width="120" />
+			<el-table-column prop="status" header-align="center" align="center" label="状态" width="120" />
 			<el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
-				<template #default="scope">
-					<el-button type="text"
-						:disabled="!proxy.isAuth(['ROOT', 'APPOINTMENT:DELETE']) || scope.row.status!='未签到'"
-						@click="deleteHandle(scope.row.id)">删除</el-button>
-				</template>
-			</el-table-column>
+					<template #default="scope">
+						<el-button type="text" :disabled="!proxy.isAuth(['ROOT', 'APPOINTMENT:DELETE']) || scope.row.status!='未签到'" @click="deleteHandle(scope.row.id)">删除</el-button>
+						
+					</template>
+				</el-table-column>
 		</el-table>
 		<el-pagination @size-change="sizeChangeHandle" @current-change="currentChangeHandle"
 			:current-page="data.pageIndex" :page-sizes="[10, 20, 50]" :page-size="data.pageSize"

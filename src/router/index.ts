@@ -140,6 +140,24 @@ const routes: Array<RouteRecordRaw> = [
 					isTab: true
 				}
 			},
+			{
+				path: 'customer_checkin',
+				name: 'MisCustomerCheckin',
+				component: () => import('../views/systemmis/customer_checkin.vue'),
+				meta:{
+					title:'体检签到',
+					isTab: true
+				}
+			},
+			{
+				path: 'checkup',
+				name: 'MisDoctorCheckup',
+				component: () => import('../views/systemmis/doctor_checkup.vue'),
+				meta:{
+					title:'医生检查',
+					isTab: true
+				}
+			},
 		]
 	},
 	{

@@ -33,6 +33,7 @@ declare module '@vue/runtime-core' {
     ElEmpty: typeof import('element-plus/es')['ElEmpty']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElFormItm: typeof import('element-plus/es')['ElFormItm']
     ElFormItme: typeof import('element-plus/es')['ElFormItme']
     ElFrom: typeof import('element-plus/es')['ElFrom']
     ElFromItem: typeof import('element-plus/es')['ElFromItem']
