@@ -158,6 +158,15 @@ const routes: Array<RouteRecordRaw> = [
 					isTab: true
 				}
 			},
+			{
+				path: 'flow_regulation',
+				name: 'MisFlowRegulation',
+				component: () => import('../views/systemmis/flow_regulation.vue'),
+				meta:{
+					title:'人员限流',
+					isTab: true
+				}
+			},
 		]
 	},
 	{
