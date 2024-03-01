@@ -167,6 +167,15 @@ const routes: Array<RouteRecordRaw> = [
 					isTab: true
 				}
 			},
+			{
+				path: 'checkup_report',
+				name: 'MisCheckupReport',
+				component: () => import('../views/systemmis/checkup_report.vue'),
+				meta:{
+					title:'体检报告',
+					isTab: true
+				}
+			},
 		]
 	},
 	{

@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElAvator: typeof import('element-plus/es')['ElAvator']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
@@ -26,6 +27,7 @@ declare module '@vue/runtime-core' {
     ElDescrption: typeof import('element-plus/es')['ElDescrption']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDivder: typeof import('element-plus/es')['ElDivder']
+    ElDivi: typeof import('element-plus/es')['ElDivi']
     ElDivider: typeof import('element-plus/es')['ElDivider']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
@@ -46,6 +48,7 @@ declare module '@vue/runtime-core' {
     ElMenuIte: typeof import('element-plus/es')['ElMenuIte']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
+    ElPageination: typeof import('element-plus/es')['ElPageination']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElRadio: typeof import('element-plus/es')['ElRadio']
     ElRadioButtion: typeof import('element-plus/es')['ElRadioButtion']
