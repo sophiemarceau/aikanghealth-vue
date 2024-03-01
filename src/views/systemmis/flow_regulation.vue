@@ -132,6 +132,203 @@
 			]
 		}
 	})
+
+	function loadPlaceList() {
+		proxy.$http('/mis/flow_regulation/searchPlaceList', "GET", null, true, function (resp) {
+			data.placeList = resp.result
+		})
+	}
+	loadPlaceList();
+
+	function loadMode() {
+		proxy.$http('/mis/flow_regulation/searchMode', "GET", null, true, function (resp) {
+			let result = resp.result
+			dataForm.mode = result
+		})
+	}
+	loadMode();
+
+	function loadDataList() {
+		data.loading = true;
+		let json = { page: data.pageIndex, length: data.pageSize, place: dataForm.place, blueUuid: dataForm.blueUuid };
+		proxy.$http('/mis/flow_regulation/searchByPage', "POST", json, true, function (resp) {
+			let page = resp.page;
+			let list = page.list;
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+		});
+	}
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.place == '') {
+					dataForm.place = null;
+				}
+				if (dataForm.blueUuid == '') {
+					dataForm.blueUuid = null;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
+
+	function addHandle() {
+		dialog.dataForm.id = null;
+		dialog.dataForm.place = null;
+		dialog.dataForm.bulueUuid = null;
+		dialog.dataForm.maxNum = 10;
+		dialog.dataForm.weight = 1;
+		dialog.dataForm.priority = 1;
+		dialog.visible = true;
+		proxy.$nextTick(() => {
+			proxy.$refs['dialogForm'].resetFields();
+		});
+	}
+
+	function dataFormSubmit() {
+		proxy.$refs['dialogForm'].validate(valid => {
+			if (valid) {
+				let json = {
+					id: dialog.dataForm.id,
+					place: dialog.dataForm.place,
+					blueUuid: dialog.dataForm.blueUuid,
+					maxNum: dialog.dataForm.maxNum,
+					weight: dialog.dataForm.weight,
+					priority: dialog.dataForm.priority
+				};
+				proxy.$http(
+					`/mis/flow_regulation/${dialog.dataForm.id == null ? 'insert' : 'update'}`,
+					'POST',
+					json,
+					true,
+					function (resp) {
+						if (resp.rows == 1) {
+							proxy.$message({
+								message: '操作成功',
+								type: 'success',
+								duration: 1200,
+								onClose: () => {
+									dialog.visible = false;
+									loadDataList();
+									loadPlaceList();
+								}
+							});
+						} else {
+							proxy.$message({
+								message: '操作失败',
+								type: 'warning',
+								duration: 1200
+							});
+						}
+					}
+				);
+			}
+		});
+	}
+
+	function updateHandle(id) {
+		dialog.dataForm.id = id;
+		dialog.visible = true;
+		proxy.$nextTick(() => {
+			proxy.$refs['dialogForm'].resetFields();
+			let json = { id: id };
+			proxy.$http('/mis/flow_regulation/searchById', "POST", json, true, function (resp) {
+				let result = resp.result;
+				dialog.dataForm.place = result.place;
+				dialog.dataForm.blueUuid = result.blueUuid;
+				dialog.dataForm.maxNum = result.maxNum;
+				dialog.dataForm.weight = result.weight;
+				dialog.dataForm.priority = result.priority;
+			});
+		});
+	}
+
+	function selectionChangeHandle(val) {
+		data.selections = val;
+	}
+
+	function selectable(row, index) {
+		return true;
+	}
+
+	function deleteHandle(id) {
+		let ids = id ? [id] : data.selections.map(item => { return item.id; });
+		if (ids.length == 0) {
+			proxy.$message({
+				message: '没有选中记录',
+				type: 'success',
+				duration: 1200,
+			});
+		} else {
+			proxy.$confirm(`确定要删除选中的记录？`, '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				let json = { ids: ids };
+				proxy.$http('/mis/flow_regulation/deleteByIds', "POST", json, true, function (resp) {
+					if (resp.rows > 0) {
+						proxy.$message({
+							message: '操作成功',
+							type: 'success',
+							duration: 1200,
+							onClose: () => {
+								dialog.visible = false;
+								loadDataList();
+								loadPlaceList();
+							}
+						});
+					} else {
+						proxy.$message({
+							message: '操作失败',
+							type: 'warning',
+							duration: 1200
+						});
+					}
+				});
+			});
+		}
+	}
+
+	function changeModeHandle() {
+		let json = { mode: !dataForm.mode };
+		let flag = false;
+		proxy.$http('/mis/flow_regulation/updateMode', "POST", json, true, function (resp) {
+			if (resp.rows > 0) {
+				proxy.$message({
+					message: '切换成功',
+					type: 'success',
+					duration: 800,
+				});
+				flag = true;
+			} else {
+				proxy.$message({
+					message: '操作失败',
+					type: 'warning',
+					duration: 800
+				});
+				flag = false;
+			}
+		});
+		return flag
+	}
 </script>
 
 <style lang="less" scoped>
