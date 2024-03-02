@@ -80,13 +80,13 @@
 	</div>
 	<el-dialog title="录入运单" v-if="proxy.isAuth(['ROOT', 'CURRENT_REPORT:UPDATE'])" :close-on-click-modal="false"
 		v-model="dialog.visible" width="420px">
-		<el-alert title="请上传快递运单照片，系统将自动识别运单中的信息，然后请您核对无误后，提交运单信息" type="success" :closable="false"></el-alert>
+		<el-alert title="请上传快递运单照片，系统将自动识别运单中的信息，然后请您核对无误后，提交运单信息" type="success" :closable="false" />
 		<el-upload :action="dialog.upload.action" name="file" accept=".jpg,.jpeg" :headers="dialog.upload.headers"
 			:show-file-list="false" :before-upload="waybillBeforeUpload" :on-success="waybillUploadSuccess"
 			:onerror="waybillUploadError">
 			<el-button type="primary">上传运单</el-button>
 		</el-upload>
-		<el-divider border-style="dashed">认真含对下方运单信息</el-divider>
+		<el-divider border-style="dashed">认真核对下方运单信息</el-divider>
 		<table class="waybill-table">
 			<tr>
 				<th>收件人姓名：</th>
@@ -104,7 +104,9 @@
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="dialog.visible=false">取消</el-button>
-				<el-button type="primary" :disabled="dialog.data.waybillCode==null||dialog.data.name!=dialog.data.recName||dialog.data.recTel.substr(7, 4)!=dialog.data.telEnd" @click="dataFormSubmit">提交运单</el-button>
+				<el-button type="primary"
+					:disabled="dialog.data.waybillCode==null||dialog.data.name!=dialog.data.recName||dialog.data.recTel.substr(7, 4)!=dialog.data.telEnd"
+					@click="dataFormSubmit">提交运单</el-button>
 			</span>
 		</template>
 	</el-dialog>
@@ -135,6 +137,7 @@
 		totalCount: 0,
 		loading: false
 	});
+
 	const dataRule = reactive({
 		name: [
 			{ required: false, pattern: '^[\u4e00-\u9fa5]{1,10}$', message: '姓名格式错误' }
@@ -155,7 +158,7 @@
 	});
 
 	const dialog = reactive({
-		visible: true,
+		visible: false,
 		upload: {
 			action: `${proxy.$baseUrl}/mis/checkup/report/identifyWaybill`,
 			headers: {

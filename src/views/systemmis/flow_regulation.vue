@@ -46,7 +46,7 @@
 			<el-table-column header-align="center" align="center" width="150" label="操作">
 				<template #default="scope">
 					<el-button type="text" :v-if="proxy.isAuth(['ROOT', 'FLOW_REGULATION:UPDATE'])"
-						:disabled="scope.row.status" @click="updateHandle(scope.row.id)">修改</el-button>
+						@click="updateHandle(scope.row.id)">修改</el-button>
 					<el-button type="text" :v-if="proxy.isAuth(['ROOT', 'FLOW_REGULATION:DELETE'])"
 						@click="deleteHandle(scope.row.id)">删除</el-button>
 				</template>
@@ -311,16 +311,17 @@
 		let json = { mode: !dataForm.mode };
 		let flag = false;
 		proxy.$http('/mis/flow_regulation/updateMode', "POST", json, true, function (resp) {
-			if (resp.rows > 0) {
+			if (resp.result) {
 				proxy.$message({
 					message: '切换成功',
 					type: 'success',
 					duration: 800,
 				});
 				flag = true;
+				dataForm.mode = !dataForm.mode;
 			} else {
 				proxy.$message({
-					message: '操作失败',
+					message: '切换失败',
 					type: 'warning',
 					duration: 800
 				});
