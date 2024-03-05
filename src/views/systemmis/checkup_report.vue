@@ -16,8 +16,9 @@
 				<el-button type="primary" @click="searchHandle()">查询</el-button>
 			</el-form-item>
 			<el-form-item>
-				<el-upload :action="upload.action" name="file" accept=".xlsx" headers="upload.headers"
-					:show-file-list="false" :on-success="excelUploadSuccess" :on-error="excelUploadError">
+				<el-upload :action="upload.action" name="file" accept=".xlsx" :headers="upload.headers"
+					:show-file-list="false" :before-upload="excelBeforeUpload" :on-success="excelUploadSuccess"
+					:on-error="excelUploadError">
 					<el-button type="primary">导入运单</el-button>
 				</el-upload>
 			</el-form-item>
@@ -64,7 +65,7 @@
 				<template #default="scope">
 					<el-button type="text" :disabled="scope.row.disabled" @click="createReportHandle(scope.row.id)">
 						生成报告</el-button>
-					<el-button type="text" :disabled="scope.row.status!='已生成'"
+					<el-button type="text" :disabled="scope.row.status =='未生成'"
 						@click="downloadReportHandle(scope.row.name, scope.row.filePath)">
 						下载报告</el-button>
 					<el-button type="text" :disabled="scope.row.status!='已生成'"
@@ -151,7 +152,7 @@
 	});
 
 	const upload = reactive({
-		action: `${proxy.$baseUrl}/mis/checkup/report/importWayBills`,
+		action: `${proxy.$baseUrl}/mis/checkup/report/importWaybills`,
 		headers: {
 			"token": localStorage.getItem('token')
 		},
@@ -175,6 +176,282 @@
 			telEnd: null
 		}
 	})
+
+	function loadDataList() {
+		data.loading = true;
+		if (dataForm.statusLabel == '全部') {
+			dataForm.status = null;
+		} else if (dataForm.statusLabel == '未生成') {
+			dataForm.status = 1;
+		} else if (dataForm.statusLabel == '已生成') {
+			dataForm.status = 2;
+		} else {
+			dataForm.status = 3;
+		}
+		let json = {
+			name: dataForm.name,
+			tel: dataForm.tel,
+			waybillCode: dataForm.waybillCode,
+			status: dataForm.status,
+			page: data.pageIndex,
+			length: data.pageSize
+		};
+		proxy.$http('/mis/checkup/report/searchByPage', 'POST', json, true, function (resp) {
+			let page = resp.page;
+			let list = page.list;
+
+			let statusEnum = {
+				"1": "未生成",
+				"2": "已生成",
+				"3": "已寄出"
+			};
+			for (let one of list) {
+				one.status = statusEnum[one.status + ""]
+				/**
+				 * 生成报告按钮是否禁用。当前日期时间10天之前如果在体检日之前，说明体检距今未超过10天，生成报告按钮处于禁用状态
+				 */
+				one.disabled = dayjs().subtract(10, 'day').isSameOrBefore(dayjs(one.date)) || one.status != "未生成"
+			}
+
+			data.dataList = list;
+			data.totalCount = page.totalCount;
+			data.loading = false;
+		});
+	}
+	loadDataList();
+
+	function searchHandle() {
+		proxy.$refs['form'].validate(valid => {
+			if (valid) {
+				proxy.$refs['form'].clearValidate();
+				if (dataForm.name == '') {
+					dataForm.name = null
+				}
+				if (dataForm.tel == '') {
+					dataForm.tel = null;
+				}
+				if (dataForm.waybillCode == '') {
+					dataForm.waybillCode = null;
+				}
+				if (data.pageIndex != 1) {
+					data.pageIndex = 1;
+				}
+				loadDataList();
+			} else {
+				return false;
+			}
+		});
+	}
+
+	function sizeChangeHandle(val) {
+		data.pageSize = val;
+		data.pageIndex = 1;
+		loadDataList();
+	}
+
+	function currentChangeHandle(val) {
+		data.pageIndex = val;
+		loadDataList();
+	}
+
+	function createReportHandle(id) {
+		ElNotification({
+			title: '提示信息',
+			message: '体检报告正在生成中，请稍后',
+			duration: 1000
+		})
+		let json = { id: id }
+		proxy.$http('/mis/checkup/report/createReport', 'POST', json, true, function (resp) {
+			if (resp.result) {
+				proxy.$message({
+					message: '体检报告创建成功',
+					type: 'success',
+					duration: 1200,
+					onClose: () => {
+						loadDataList();
+					}
+				});
+			} else {
+				proxy.$message({
+					message: '体检报告创建失败',
+					type: 'error',
+					duration: 1200
+				});
+			}
+		});
+	}
+
+	function downloadReportHandle(name, filePath) {
+		let url = `${proxy.$baseUrl}/mis/checkup/report/downloadReport?token=${localStorage.getItem('token')}&name=${name}&filePath=${filePath}`;
+		let a = document.createElement('a');
+		a.href = url;
+		a.click();
+	}
+
+	function copyAddressHandle(name, tel, mailingAddress) {
+		proxy.$message({
+			message: '已复制邮寄地址',
+			type: 'success',
+			duration: 800,
+		});
+		var input = document.createElement("input");//直接构建input
+		input.value = `${name}, ${tel}, ${mailingAddress}`;//设置内容
+		document.body.appendChild(input);//添加临时实例
+		input.select();//选择实例内容
+		document.execCommand("Copy");//执行复制
+		document.body.removeChild(input);//删除临时实例
+	}
+
+	function identifyWaybillHandle(id, name, tel) {
+		dialog.data.id = id;
+		dialog.data.recName = null
+		dialog.data.recTel = null
+		dialog.data.waybillCode = null
+		dialog.data.name = name
+		dialog.data.telEnd = tel.substr(7, 4)//保存尾号
+		dialog.visible = true
+	}
+
+	function waybillBeforeUpload(file) {
+		let size = file.size / 1024 / 1024;
+		if (size > 5) {
+			proxy.$message({
+				message: '图片不能超过5M大小',
+				type: 'error',
+				duration: 1200
+			});
+			return false;
+		}
+		proxy.$message({
+			message: '识别中请稍后',
+			type: 'info',
+			duration: 1000
+		});
+		return true;
+	}
+
+	function waybillUploadError(e) {
+		proxy.$message({
+			message: '图片上传失败',
+			type: 'error',
+			duration: 1200
+		});
+		console.error(e)
+	}
+
+	function waybillUploadSuccess(resp : any, uploadFile : UploadFile, uploadFiles : UploadFiles) {
+		if (resp.msg == 'success') {
+			let result = resp.result;
+			dialog.data.recName = result.recName
+			dialog.data.recTel = result.recTel
+			dialog.data.waybillCode = result.waybillCode
+			if (result.recName != dialog.data.name || result.recTel.subStr(7, 4) != dialog.data.telEnd) {
+				proxy.$message({
+					message: '收件人姓名或者电话与体验人不符',
+					type: 'error',
+					duration: 1200
+				});
+			}
+		}
+	}
+
+	function dataFormSubmit() {
+		let waybillCode = dialog.data.waybillCode
+		let waybillDate = dayjs().format('YYYY-MM-DD')
+		if (!isBlank(waybillCode)) {
+			let json = {
+				id: dialog.data.id,
+				waybillCode: waybillCode,
+				waybillDate: waybillDate
+			}
+			proxy.$http('/mis/checkup/report/addWaybill', 'POST', json, true, function (resp) {
+				if (resp.result) {
+					proxy.$message({
+						message: '运单提交成功',
+						type: 'success',
+						duration: 1200,
+						onClose: () => {
+							dialog.visible = false
+							loadDataList();
+						}
+					});
+				} else {
+					proxy.$message({
+						message: '运单提交失败',
+						type: 'error',
+						duration: 1200
+					});
+				}
+			});
+		}
+	}
+
+	function base64ToBlob(base64, mime) {
+		let arr = base64.split(",")
+		let bstr = atob(arr)
+		let n = bstr.length
+		let u8arr = new Uint8Array(n);
+		while (n--) {
+			u8arr[n] = bstr.charCodeAt(n);
+		}
+		return new Blob([u8arr], {
+			type: mime
+		});
+	}
+
+	function excelBeforeUpload(file) {
+		let size = file.size / 1024 / 1024;
+		if (size > 20) {
+			proxy.$message({
+				message: 'Excel文件不能超过20M大小',
+				type: 'error',
+				duration: 1200
+			});
+			return false;
+		}
+		return true;
+	}
+
+	function excelUploadSuccess(resp : any, uploadFile : UploadFile, uploadFiles : UploadFiles) {
+		loadDataList()
+		if (resp.hasOwnProperty("fileBase64")) {
+			proxy.$message({
+				message: '存在导入失败的运单，请查看下载的Excel文件',
+				type: 'warning',
+				duration: 2500
+			});
+			let base64 = resp.fileBase64;
+			//把base64字符串转换成Blob 2进制数据，并且设置MIME类型
+			let blob = base64ToBlob(base64, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+			let a = document.createElement("a")
+			//把2进制 数据转换成URL地址
+			let href = window.URL.createObjectURL(blob)
+			a.href = href
+			//规定下载文件名称
+			a.download = "导入失败的运单.xlsx"
+			document.body.appendChild(a)
+			//访问2进制数据， 浏览器自动会下载Excel文件
+			a.click()
+			document.body.removeChild(a)
+			//释放2进制数据，节省浏览器内存
+			window.URL.revokeObjectURL(href)
+		} else {
+			proxy.$message({
+				message: '运单导入成功',
+				type: 'success',
+				duration: 1200
+			});
+		}
+	}
+
+	function execlUploadError(e) {
+		proxy.$message({
+			message: 'Excel文件上传失败',
+			type: 'error',
+			duration: 2500
+		});
+		console.error(e)
+	}
 </script>
 
 <style lang="less" scoped>

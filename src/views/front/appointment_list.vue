@@ -100,7 +100,7 @@
 			for (let one of list) {
 				one.status = statusEnum[one.status + ""]
 				if (one.filePath != null) {
-					one.filePath = `${proxy.$miniUrl}/${one.filePath}`
+					one.filePath = `${proxy.$minioUrl}/${one.filePath}`
 				}
 			}
 			data.dataList = list;
@@ -141,6 +141,12 @@
 	function currentChangeHandle(val) {
 		data.pageIndex = val;
 		loadDataList();
+	}
+
+	function downloadHandle(name, filePath) {
+		let a = document.createElement('a');
+		a.href = filePath;
+		a.click();
 	}
 </script>
 
