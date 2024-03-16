@@ -630,7 +630,7 @@
 
 		proxy.$nextTick(() => {
 			proxy.$refs['dialogForm'].resetFields();
-			let json = { id, id };
+			let json = { id: id };
 			loadAllRule();
 			proxy.$http('/mis/goods/searchById', 'POST', json, true, function (resp) {
 				let result = resp.result;
