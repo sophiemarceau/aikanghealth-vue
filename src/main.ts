@@ -119,7 +119,7 @@ app.config.globalProperties.getPdf = function () {
 	});
 };
 
-app.use(VueNativeSock, 'ws://192.168.31.:7700/his-api/socket', {
+app.use(VueNativeSock, 'ws://localhost:7700/his-api/socket', {
 	format: 'json',
 	//if websocket连接长时间不收发请求，会被服务端切断连接，下 设置可以自动重连
 	reconnection: true
@@ -127,11 +127,11 @@ app.use(VueNativeSock, 'ws://192.168.31.:7700/his-api/socket', {
 
 //后端项目的URL根路径
 // let baseUrl = 'https://192.168.31.143:7700/his-api';
-let baseUrl = 'http://192.168.31.143:7700/his-api';
+let baseUrl = 'http://localhost:7700/his-api';
 app.config.globalProperties.$baseUrl = baseUrl; //设置全局变量$baseUrl
 
 //Minio服务器地址
-let minioUrl = 'http://192.168.31.143:9000/his';
+let minioUrl = 'http://152.136.137.85:9000/his';
 app.config.globalProperties.$minioUrl = minioUrl;
 
 //配置 腾讯IM

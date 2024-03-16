@@ -191,9 +191,7 @@
 	import { isURL } from '../../utils/validate';
 	import { ref, reactive, provide, getCurrentInstance, onMounted, watch } from 'vue';
 	import { useRoute, useRouter } from 'vue-router';
-	import { Component, Vue, Watch } from 'vue-property-decorator';
 	import func from '../../../vue-temp/vue-editor-bridge';
-	import { dialogEmits } from 'element-plus/es/components/index.js';
 
 	//用于获取路由参数
 	const route = useRoute();

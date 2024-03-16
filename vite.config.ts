@@ -7,7 +7,7 @@ import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 
 //配置SVG依赖库（此处为新增）
-import path from 'path'
+import path from 'path';
 import viteSvgIcons, { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 
 // https://vitejs.dev/config/
@@ -29,9 +29,9 @@ export default defineConfig({
         })
     ],
     server: {
-        host: '192.168.31.143',
+        host: "localhost",
         port: 7600,
-		//允许跨域
-		cors:true
+        //允许跨域
+        cors: true
     }
 });
